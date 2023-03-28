@@ -37,13 +37,13 @@ app.post("/", async (req, res) => {
     console.log("Passed: ", req.body.input);
 
     res.status(200).send({
-      bot: response.data.choices[0].text
-    })
+      bot: response.data.choices[0].text,
+    });
 
   } catch (error) {
     console.log("Failed: ", req.body.input);
     console.log(error);
-    res.status(500).send(err);
+    res.status(500).send(error);
   }
 })
 

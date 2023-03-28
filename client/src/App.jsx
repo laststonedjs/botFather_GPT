@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from "axios";
 // assets
 import send from "./assets/send.svg";
 import user from "./assets/user.png";
@@ -9,15 +10,65 @@ function App() {
   const [input, setInput] = useState("");
   const [posts, setPosts] = useState([]);
 
+  const fetchBotResponse = async () => {
+    const { data } = await axios.post(
+      "http://localhost:4000",
+      { input },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return data;
+  };
+
   const onSubmit = () => {
     if (input.trim() === "") return;
     updatePosts(input);
+    updatePosts("Loading...", false, true);
+    setInput("");
+    fetchBotResponse().then((res) => {
+      console.log(res);
+      updatePosts(res.bot.trim(), true);
+    });
   };
 
-  const updatePosts = (post) => {
-    setPosts((prevState) => {
-      return [...prevState, { type: "user", post }];
-    });
+  const autoTypingBotResponse = (text) => {
+    let index = 0;
+    let interval = setInterval(() => {
+      if (index < text.length) {
+        setPosts((prevState) => {
+          let lastItem = prevState.pop();
+          if (lastItem.type !== "bot") {
+            prevState.push({
+              type: "bot",
+              post: text.charAt(index - 1),
+            });
+          } else {
+            prevState.push({
+              type: "bot",
+              post: lastItem.post + text.charAt(index - 1),
+            });
+          }
+          return [...prevState];
+        });
+        index++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 30);
+  };
+
+  const updatePosts = (post, isBot, isLoading) => {
+    if (isBot) {
+      autoTypingBotResponse();
+    } else {
+      setPosts((prevState) => {
+        return [...prevState, { type: isLoading ? "loading" : "user", post }];
+      });
+    }
   };
 
   const onKeyUp = (e) => {
@@ -60,6 +111,7 @@ function App() {
           className="composebar"
           autoFocus
           type="text"
+          value={input}
           placeholder="I'm the BotFather, don't be shy, ask anything!"
           onChange={(e) => setInput(e.target.value)}
           onKeyUp={onKeyUp}
