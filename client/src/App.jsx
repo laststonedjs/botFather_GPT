@@ -5,11 +5,6 @@ import user from "./assets/user.png";
 import bot from "./assets/bot.png";
 import loadingIcon from "./assets/loader.svg";
 
-// let array = [
-//   { type: "user", post: "something" },
-//   { type: "bot", post: "something else" },
-// ];
-
 function App() {
   const [input, setInput] = useState("");
   const [posts, setPosts] = useState([]);
